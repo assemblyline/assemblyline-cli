@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 
-ENV['ASSEMBLYLINE_SERVICES'].split.each do |service|
+services = ENV['ASSEMBLYLINE_SERVICES'] || ""
+services.split.each do |service|
   system("service #{service} start")
 end
 
-exit system("#{ARGV.join(' ')}")
+system("#{ARGV.join(' ')}")
+exit!($?.exitstatus)
