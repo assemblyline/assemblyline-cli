@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Ed Robinson"]
   spec.email         = ["ed@reevoo.com"]
   spec.summary       = %q{A wrapper to start services when running assemblyline tests}
-  spec.homepage      = "http:://github.com/assemblyline"
+  spec.homepage      = "http://github.com/assemblyline"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
