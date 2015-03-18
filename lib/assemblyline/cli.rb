@@ -5,17 +5,20 @@ module Assemblyline
   class CLI < Thor
     desc "build URL", "Build an assemblyline project from a git url"
     def build(url)
-      exec "docker run --rm -ti -v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock -e SSH_KEY=#{ssh_key} -e DOCKERCFG=#{dockercfg} quay.io/assemblyline/builder:latest bin/build #{url}"
+      exec "docker run --rm -v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock -e SSH_KEY=#{ssh_key} -e DOCKERCFG=#{dockercfg} quay.io/assemblyline/builder:latest bin/build #{url}"
     end
 
     private
 
     def ssh_key
-      File.read(key_path).dump
+      key = File.read(key_path)
+      fail "SSH private key not found" unless key
+      key.dump
     end
 
     def dockercfg
-      File.read(File.join(ENV['HOME'], '.dockercfg')).dump
+      cfg = File.read(File.join(ENV['HOME'], '.dockercfg')).gsub("\n",'')
+      cfg.dump
     end
 
     def key_path
