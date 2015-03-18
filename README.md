@@ -1,25 +1,25 @@
 # Assemblyline::Cli
 
-A super-lightweight wrapper to start init.d services inside dockerised test containers
+A super-lightweight wrapper to start assemblyline tasks
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'assemblyline-cli'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
+Or install with:
 
     $ gem install assemblyline-cli
 
+## Dependencies
+
+* Ruby
+* Docker
+
 ## Usage
 
-Include the services to start in the ASSEMBLYLINE_SERVICES environment var.
-Pass the test command to run in as args.
+```
+Commands:
+  assemblyline build URL       # Build an assemblyline project from a git url
+  assemblyline help [COMMAND]  # Describe available commands or one specific command
+```
 
 ## Contributing
 

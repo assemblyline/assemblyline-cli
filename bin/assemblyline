@@ -1,9 +1,5 @@
 #!/usr/bin/env ruby
 
-services = ENV['ASSEMBLYLINE_SERVICES'] || ""
-services.split.each do |service|
-  system("service #{service} start")
-end
+require 'assemblyline/cli'
 
-system("#{ARGV.join(' ')}")
-exit!($?.exitstatus)
+Assemblyline::CLI.start
