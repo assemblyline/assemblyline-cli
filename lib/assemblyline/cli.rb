@@ -3,9 +3,9 @@ require 'thor'
 
 module Assemblyline
   class CLI < Thor
-    desc "build URL", "Build an assemblyline project from a git url"
-    def build(url)
-      exec "docker run --rm -v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock -e SSH_KEY=#{ssh_key} -e DOCKERCFG=#{dockercfg} quay.io/assemblyline/builder:latest bin/build #{url}"
+    desc "build URL (REF)", "Build an assemblyline project from a git url and optionaly merge REF into master"
+    def build(url, ref=nil)
+      exec "docker run --rm -v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock -e SSH_KEY=#{ssh_key} -e DOCKERCFG=#{dockercfg} quay.io/assemblyline/builder:latest bin/build #{url} #{ref}"
     end
 
     private
