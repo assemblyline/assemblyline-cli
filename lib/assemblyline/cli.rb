@@ -4,8 +4,9 @@ require 'thor'
 module Assemblyline
   class CLI < Thor
     desc 'build URL (REF)', 'Build an assemblyline project from a git url and optionaly merge REF into master'
+    option :debug, type: :boolean
     def build(url, ref = nil)
-      exec "docker run --rm #{bind_mounts} #{env_flags} #{assemblyline_builder} bin/build #{url} #{ref}"
+      exec "docker run --rm #{bind_mounts} #{env_flags} #{debug_flags} #{assemblyline_builder} bin/build #{url} #{ref}"
     end
 
     desc 'update', 'update assemblyline'
@@ -21,6 +22,11 @@ module Assemblyline
     end
 
     private
+
+    def debug_flags
+      return unless options[:debug]
+      "-v #{Dir.pwd}:/usr/src -ti"
+    end
 
     def env_flags
       env.map { |var, val| "-e #{var}=#{val}" }.join(' ')
