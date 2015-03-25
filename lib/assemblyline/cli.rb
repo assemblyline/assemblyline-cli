@@ -3,10 +3,14 @@ require 'thor'
 
 module Assemblyline
   class CLI < Thor
-    desc 'build URL (REF)', 'Build an assemblyline project from a git url and optionaly merge REF into master'
-    option :debug, type: :boolean
-    def build(url, ref = nil)
-      exec "docker run --rm #{bind_mounts} #{env_flags} #{debug_flags} #{assemblyline_builder} bin/build #{url} #{ref}"
+    desc 'build GIT_URL or PATH', 'Build an assemblyline project from a git url or path'
+    option :debug, type: :boolean, default: false, desc: 'start assemblyline-builder with a tty'
+    option :push, type: :boolean, default: false, desc: 'push the built image to docker repo'
+    option :ref, type: :string, desc: 'merge this ref into master before building'
+    option :dev, type: :string, desc: 'use a local dev checkout of assemblyline-builder', banner: 'PATH'
+    def build(url_or_path)
+      init_local_mount url_or_path
+      exec "docker run --rm #{bind_mounts} #{env_flags} #{debug_flags} #{local_mount} #{assemblyline_builder} bin/build #{build_command(url_or_path)}" # rubocop:disable Metrics/LineLength
     end
 
     desc 'update', 'update assemblyline'
@@ -23,9 +27,37 @@ module Assemblyline
 
     private
 
+    attr_reader :local_mount
+
+    def build_command(url_or_path)
+      if local_mount
+        "local_build #{push}#{sha}"
+      else
+        "build #{push}#{url_or_path} #{options[:ref]}"
+      end
+    end
+
+    def push
+      return unless options[:push]
+      '--push '
+    end
+
+    def sha
+      `git rev-parse --short HEAD`.chomp
+    end
+
+    def init_local_mount(path)
+      return unless dir?(path)
+      @local_mount = "-v #{File.expand_path(Dir.pwd, path)}:/usr/assemblyline/local"
+    end
+
+    def dir?(path)
+      File.directory?(File.expand_path(Dir.pwd, path))
+    end
+
     def debug_flags
       return unless options[:debug]
-      "-v #{Dir.pwd}:/usr/src -ti"
+      '-ti'
     end
 
     def env_flags
