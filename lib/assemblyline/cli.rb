@@ -10,7 +10,7 @@ module Assemblyline
     option :dev, type: :string, desc: 'use a local dev checkout of assemblyline-builder', banner: 'PATH'
     def build(url_or_path)
       init_local_mount url_or_path
-      exec "docker run --rm #{bind_mounts} #{env_flags} #{debug_flags} #{local_mount} #{assemblyline_builder} bin/build #{build_command(url_or_path)}" # rubocop:disable Metrics/LineLength
+      exec "docker run --rm #{bind_mounts} #{env_flags} #{debug_flags} #{dev_mount} #{local_mount} #{assemblyline_builder} bin/build #{build_command(url_or_path)}" # rubocop:disable Metrics/LineLength
     end
 
     desc 'update', 'update assemblyline'
@@ -48,16 +48,21 @@ module Assemblyline
 
     def init_local_mount(path)
       return unless dir?(path)
-      @local_mount = "-v #{File.expand_path(Dir.pwd, path)}:/usr/assemblyline/local"
+      @local_mount = "-v #{File.expand_path(path, Dir.pwd)}:/usr/assemblyline/local"
     end
 
     def dir?(path)
-      File.directory?(File.expand_path(Dir.pwd, path))
+      File.directory?(File.expand_path(path, Dir.pwd))
     end
 
     def debug_flags
-      return unless options[:debug]
+      return unless options[:debug] || options[:dev]
       '-ti'
+    end
+
+    def dev_mount
+      return unless options[:dev]
+      "-v #{File.expand_path(options[:dev], Dir.pwd)}:/usr/src"
     end
 
     def env_flags
