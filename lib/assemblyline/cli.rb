@@ -91,7 +91,7 @@ module Assemblyline
     end
 
     def dockercfg
-      cfg = File.read(File.join(ENV['HOME'], '.dockercfg')).gsub("\n", '')
+      cfg = File.read(File.join(ENV['HOME'], '.dockercfg')).gsub("\n", '').gsub("\t", '')
       cfg.dump
     end
 

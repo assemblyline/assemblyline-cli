@@ -1,3 +1,3 @@
 module Assemblyline
-  CLI_VERSION = '0.0.8'
+  CLI_VERSION = '0.0.9'
 end
