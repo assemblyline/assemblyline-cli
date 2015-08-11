@@ -73,6 +73,7 @@ module Assemblyline
       {
         'SSH_KEY' => ssh_key,
         'DOCKERCFG' => dockercfg,
+        'JSPM_GITHUB_TOKEN' => ENV['JSPM_GITHUB_TOKEN'],
       }
     end
 
