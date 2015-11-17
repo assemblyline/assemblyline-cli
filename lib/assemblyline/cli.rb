@@ -92,8 +92,9 @@ module Assemblyline
     end
 
     def dockercfg
-      cfg = File.read(File.join(ENV['HOME'], '.dockercfg')).gsub("\n", '').gsub("\t", '')
-      cfg.dump
+      cfg = ENV['DOCKERCFG']
+      cfg ||= File.read(File.join(Dir.home, '.dockercfg'))
+      cfg.gsub("\n", '').gsub("\t", '').dump
     end
 
     def key_path
