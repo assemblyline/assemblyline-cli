@@ -74,7 +74,21 @@ module Assemblyline
         'SSH_KEY' => ssh_key,
         'DOCKERCFG' => dockercfg,
         'JSPM_GITHUB_TOKEN' => ENV['JSPM_GITHUB_TOKEN'],
-      }
+        'CI' => ci?,
+        'CI_MASTER' => ci_master?,
+      }.reject { |_,v| v.nil? }
+    end
+
+    def ci?
+      %w{CI CONTINUOUS_INTEGRATION TDDIUM TRAVIS BUILD_ID JENKINS_URL CIRCLECI}.each do |var|
+        return true if ENV[var]
+      end
+      nil
+    end
+
+    def ci_master?
+      return true if ENV['GIT_BRANCH'] == 'origin/master'
+      return true if ENV['CI_MASTER']
     end
 
     def bind_mounts
