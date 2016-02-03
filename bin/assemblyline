@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'assemblyline/cli'
+require "assemblyline/cli"
 
 Assemblyline::CLI.start

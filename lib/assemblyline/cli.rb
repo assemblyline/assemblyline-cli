@@ -1,26 +1,26 @@
-require 'assemblyline/cli/version'
-require 'thor'
+require "assemblyline/cli/version"
+require "thor"
 
 module Assemblyline
   class CLI < Thor
-    desc 'build GIT_URL or PATH', 'Build an assemblyline project from a git url or path'
-    option :debug, type: :boolean, default: false, desc: 'start assemblyline-builder with a tty'
-    option :push, type: :boolean, default: false, desc: 'push the built image to docker repo'
-    option :ref, type: :string, desc: 'merge this ref into master before building'
-    option :dev, type: :string, desc: 'use a local dev checkout of assemblyline-builder', banner: 'PATH'
+    desc "build GIT_URL or PATH", "Build an assemblyline project from a git url or path"
+    option :debug, type: :boolean, default: false, desc: "start assemblyline-builder with a tty"
+    option :push, type: :boolean, default: false, desc: "push the built image to docker repo"
+    option :ref, type: :string, desc: "merge this ref into master before building"
+    option :dev, type: :string, desc: "use a local dev checkout of assemblyline-builder", banner: "PATH"
     def build(url_or_path)
       init_local_mount url_or_path
       exec "docker run --rm #{bind_mounts} #{env_flags} #{debug_flags} #{dev_mount} #{local_mount} #{assemblyline_builder} bin/build #{build_command(url_or_path)}" # rubocop:disable Metrics/LineLength
     end
 
-    desc 'update', 'update assemblyline'
+    desc "update", "update assemblyline"
     def update
       fail unless system "docker pull #{assemblyline_builder}"
-      exec 'gem install assemblyline-cli'
+      exec "gem install assemblyline-cli"
     end
 
-    map '-v' => 'version', '--version' => 'version'
-    desc 'version', 'print the current version'
+    map "-v" => "version", "--version" => "version"
+    desc "version", "print the current version"
     def version
       puts CLI_VERSION
     end
@@ -39,7 +39,7 @@ module Assemblyline
 
     def push
       return unless options[:push]
-      '--push '
+      "--push "
     end
 
     def sha
@@ -57,7 +57,7 @@ module Assemblyline
 
     def debug_flags
       return unless options[:debug] || options[:dev]
-      '-ti'
+      "-ti"
     end
 
     def dev_mount
@@ -66,49 +66,49 @@ module Assemblyline
     end
 
     def env_flags
-      env.map { |var, val| "-e #{var}=#{val}" }.join(' ')
+      env.map { |var, val| "-e #{var}=#{val}" }.join(" ")
     end
 
     def env
       {
-        'SSH_KEY' => ssh_key,
-        'DOCKERCFG' => dockercfg,
-        'JSPM_GITHUB_TOKEN' => ENV['JSPM_GITHUB_TOKEN'],
-        'CI' => ci?,
-        'CI_MASTER' => ci_master?,
-      }.reject { |_,v| v.nil? }
+        "SSH_KEY" => ssh_key,
+        "DOCKERCFG" => dockercfg,
+        "JSPM_GITHUB_TOKEN" => ENV["JSPM_GITHUB_TOKEN"],
+        "CI" => ci?,
+        "CI_MASTER" => ci_master?,
+      }.reject { |_, v| v.nil? }
     end
 
     def ci?
-      %w{CI CONTINUOUS_INTEGRATION TDDIUM TRAVIS BUILD_ID JENKINS_URL CIRCLECI}.each do |var|
+      %w(CI CONTINUOUS_INTEGRATION TDDIUM TRAVIS BUILD_ID JENKINS_URL CIRCLECI).each do |var|
         return true if ENV[var]
       end
       nil
     end
 
     def ci_master?
-      return true if ENV['GIT_BRANCH'] == 'origin/master'
-      return true if ENV['CI_MASTER']
+      return true if ENV["GIT_BRANCH"] == "origin/master"
+      return true if ENV["CI_MASTER"]
     end
 
     def bind_mounts
-      '-v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock'
+      "-v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock"
     end
 
     def assemblyline_builder
-      'quay.io/assemblyline/builder:latest'
+      "quay.io/assemblyline/builder:latest"
     end
 
     def ssh_key
       key = File.read(key_path)
-      fail 'SSH private key not found' unless key
+      fail "SSH private key not found" unless key
       key.dump
     end
 
     def dockercfg
-      cfg = ENV['DOCKERCFG']
-      cfg ||= File.read(File.join(Dir.home, '.dockercfg'))
-      cfg.gsub("\n", '').gsub("\t", '').dump
+      cfg = ENV["DOCKERCFG"]
+      cfg ||= File.read(File.join(Dir.home, ".dockercfg"))
+      cfg.gsub("\n", "").gsub("\t", "").dump
     end
 
     def key_path
@@ -116,7 +116,7 @@ module Assemblyline
     end
 
     def ssh_key_path(key)
-      File.join(ENV['HOME'], ".ssh/#{key}")
+      File.join(ENV["HOME"], ".ssh/#{key}")
     end
   end
 end
