@@ -56,7 +56,7 @@ module Assemblyline
     end
 
     def debug_flags
-      return unless options[:debug] || options[:dev]
+      return unless options[:debug] || options[:dev] || $stdout.isatty
       "-ti"
     end
 
