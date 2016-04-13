@@ -113,7 +113,11 @@ module Assemblyline
 
       def dockercfg
         cfg = ENV["DOCKERCFG"]
-        cfg ||= File.read(File.join(Dir.home, ".dockercfg"))
+        [".dockercfg", ".docker/config.json"].each do |cfg_path|
+          path = File.join(Dir.home, cfg_path)
+          next unless File.exist? path
+          cfg ||= File.read(path)
+        end
         cfg.gsub("\n", "").gsub("\t", "").dump
       end
 
