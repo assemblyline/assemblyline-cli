@@ -138,7 +138,7 @@ module Assemblyline
       end
 
       def git_url
-        u = `git remote get-url`
+        u = `git remote get-url origin`.chomp
         u.empty? ? nil : u
       end
     end
