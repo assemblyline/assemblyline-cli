@@ -118,6 +118,7 @@ module Assemblyline
           next unless File.exist? path
           cfg ||= File.read(path)
         end
+        return unless cfg
         cfg.gsub("\n", "").gsub("\t", "").dump
       end
 
