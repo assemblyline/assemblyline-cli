@@ -46,15 +46,6 @@ module Assemblyline
       `git rev-parse --short HEAD`.chomp
     end
 
-    def build_url
-      ENV["BUILD_URL"]
-    end
-
-    def git_url
-      u = `git remote get-url`
-      u.empty? ? nil : u
-    end
-
     def init_local_mount(path)
       return unless dir?(path)
       @local_mount = "-v #{File.expand_path(path, Dir.pwd)}:/usr/assemblyline/local"
@@ -74,35 +65,6 @@ module Assemblyline
       "-v #{File.expand_path(options[:dev], Dir.pwd)}:/usr/src"
     end
 
-    def env_flags
-      env.map { |var, val| "-e #{var}=#{val}" }.join(" ")
-    end
-
-    def env
-      {
-        "SSH_KEY" => ssh_key,
-        "DOCKERCFG" => dockercfg,
-        "JSPM_GITHUB_TOKEN" => ENV["JSPM_GITHUB_TOKEN"],
-        "CI" => ci?,
-        "CI_MASTER" => ci_master?,
-        "BUILD_URL" => build_url,
-        "GIT_URL" => git_url,
-        "GITHUB_ACCESS_TOKEN" => ENV["GITHUB_ACCESS_TOKEN"],
-      }.reject { |_, v| v.nil? }
-    end
-
-    def ci?
-      %w(CI CONTINUOUS_INTEGRATION TDDIUM TRAVIS BUILD_ID JENKINS_URL CIRCLECI).each do |var|
-        return true if ENV[var]
-      end
-      nil
-    end
-
-    def ci_master?
-      return true if ENV["GIT_BRANCH"] == "origin/master"
-      return true if ENV["CI_MASTER"]
-    end
-
     def bind_mounts
       "-v /tmp:/tmp -v /var/run/docker.sock:/var/run/docker.sock"
     end
@@ -111,24 +73,70 @@ module Assemblyline
       "quay.io/assemblyline/builder:latest"
     end
 
-    def ssh_key
-      key = File.read(key_path)
-      fail "SSH private key not found" unless key
-      key.dump
+    def env_flags
+      Env.new.to_flags
     end
 
-    def dockercfg
-      cfg = ENV["DOCKERCFG"]
-      cfg ||= File.read(File.join(Dir.home, ".dockercfg"))
-      cfg.gsub("\n", "").gsub("\t", "").dump
-    end
+    class Env
+      def to_flags
+        to_hash.map { |var, val| "-e #{var}=#{val}" }.join(" ")
+      end
 
-    def key_path
-      %w(id_rsa id_dsa).map { |private_key| ssh_key_path(private_key) }.detect { |path| File.exist? path }
-    end
+      def to_hash
+        {
+          "SSH_KEY" => ssh_key,
+          "DOCKERCFG" => dockercfg,
+          "JSPM_GITHUB_TOKEN" => ENV["JSPM_GITHUB_TOKEN"],
+          "CI" => ci?,
+          "CI_MASTER" => ci_master?,
+          "BUILD_URL" => build_url,
+          "GIT_URL" => git_url,
+          "GITHUB_ACCESS_TOKEN" => ENV["GITHUB_ACCESS_TOKEN"],
+        }.reject { |_, v| v.nil? }
+      end
 
-    def ssh_key_path(key)
-      File.join(ENV["HOME"], ".ssh/#{key}")
+      private
+
+      def ssh_key
+        key = File.read(key_path)
+        fail "SSH private key not found" unless key
+        key.dump
+      end
+
+      def key_path
+        %w(id_rsa id_dsa).map { |private_key| ssh_key_path(private_key) }.detect { |path| File.exist? path }
+      end
+
+      def ssh_key_path(key)
+        File.join(ENV["HOME"], ".ssh/#{key}")
+      end
+
+      def dockercfg
+        cfg = ENV["DOCKERCFG"]
+        cfg ||= File.read(File.join(Dir.home, ".dockercfg"))
+        cfg.gsub("\n", "").gsub("\t", "").dump
+      end
+
+      def ci?
+        %w(CI CONTINUOUS_INTEGRATION TDDIUM TRAVIS BUILD_ID JENKINS_URL CIRCLECI).each do |var|
+          return true if ENV[var]
+        end
+        nil
+      end
+
+      def ci_master?
+        return true if ENV["GIT_BRANCH"] == "origin/master"
+        return true if ENV["CI_MASTER"]
+      end
+
+      def build_url
+        ENV["BUILD_URL"]
+      end
+
+      def git_url
+        u = `git remote get-url`
+        u.empty? ? nil : u
+      end
     end
   end
 end
