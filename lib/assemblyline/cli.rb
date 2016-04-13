@@ -46,6 +46,15 @@ module Assemblyline
       `git rev-parse --short HEAD`.chomp
     end
 
+    def build_url
+      ENV["BUILD_URL"]
+    end
+
+    def git_url
+      u = `git remote get-url`
+      u.empty? ? nil : u
+    end
+
     def init_local_mount(path)
       return unless dir?(path)
       @local_mount = "-v #{File.expand_path(path, Dir.pwd)}:/usr/assemblyline/local"
@@ -76,6 +85,9 @@ module Assemblyline
         "JSPM_GITHUB_TOKEN" => ENV["JSPM_GITHUB_TOKEN"],
         "CI" => ci?,
         "CI_MASTER" => ci_master?,
+        "BUILD_URL" => build_url,
+        "GIT_URL" => git_url,
+        "GITHUB_ACCESS_TOKEN" => ENV["GITHUB_ACCESS_TOKEN"],
       }.reject { |_, v| v.nil? }
     end
 
