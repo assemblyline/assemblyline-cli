@@ -43,7 +43,7 @@ module Assemblyline
     end
 
     def sha
-      ENV["branch"] || `git rev-parse HEAD`.chomp
+      `git rev-parse HEAD`.chomp
     end
 
     def init_local_mount(path)
