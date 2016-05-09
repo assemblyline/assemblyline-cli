@@ -43,7 +43,15 @@ module Assemblyline
     end
 
     def sha
+      branch_tip == "" ? tip : branch_tip
+    end
+
+    def tip
       `git rev-parse HEAD`.chomp
+    end
+
+    def branch_tip
+      `git rev-parse #{ENV["branch"]}`.chomp
     end
 
     def init_local_mount(path)
