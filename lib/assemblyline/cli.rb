@@ -106,9 +106,8 @@ module Assemblyline
       private
 
       def ssh_key
-        key = File.read(key_path)
-        fail "SSH private key not found" unless key
-        key.dump
+        key = File.read(key_path) if key_path
+        key.dump if key
       end
 
       def key_path
